@@ -1,0 +1,373 @@
+import java.io.IOException;
+
+import java.sql.SQLOutput;
+import java.util.Scanner;
+
+void main() throws IOException, InterruptedException {
+    final String BLUE = "\33[34;1m";
+    final String RED = "\33[31;1m";
+    final String YELLOW = "\33[33;1m";
+    final String GREEN = "\33[32;1m";
+    final String PURPLE = "\33[35;1m";
+    final String GRAY = "\33[37;1m";
+    final String RESET = "\33[0m";
+
+    double bestAverage = 0;
+    double worstAverage = 0;
+    String studentDetail = ",";
+    int id = 0;
+    final Scanner SCN = new Scanner(System.in);
+    main:
+    while (true) {
+        new ProcessBuilder("clear").inheritIO().start().waitFor();
+        System.out.println("------------Student DB------------");
+        System.out.println("1.Add New Student");
+        System.out.println("2.Delete Student");
+        System.out.println("3.Search Student");
+        System.out.println("4.View All Students");
+        System.out.println("5.Exit\n");
+
+        System.out.print("Enter a Number To Continue : ");
+
+        switch (SCN.nextInt()) {
+            case 1 -> {
+                System.out.println("----Add New Student----");
+                case1:
+                while (true) {
+                    System.out.print("Enter Student Name : ");
+                    SCN.skip("\n");
+                    String name = SCN.nextLine();
+                    if (!name.isBlank()) {
+                        id++;
+                        String idFormatted = String.format("S%03d", id);
+                        studentDetail += idFormatted + "-" + name + "-";
+                        System.out.println("Student Name added");
+                        boolean isMarksTrue = true;
+                        while (isMarksTrue) {
+                            //pf mark validation
+                            System.out.print("Enter Programming Fundamentals Marks : ");
+                            int pfMarks = SCN.nextInt();
+
+                            if (pfMarks < 0 || pfMarks > 100) {
+                                System.out.println("Invalid Marks.Try Again");
+                            } else {
+                                studentDetail += "|" + pfMarks;
+                                boolean isOopMarksTrue = true;
+                                oopMarkCheck:
+                                while (isOopMarksTrue) {
+                                    //oop mark validation
+                                    System.out.print("Enter OOP Marks : ");
+                                    int oopMarks = SCN.nextInt();
+                                    if (oopMarks > 0 && oopMarks < 100) {
+                                        studentDetail += "|" + oopMarks + ",";
+                                        System.out.println("Student Details Added");
+                                        System.out.println(studentDetail);
+                                        //menu exit choice
+                                        boolean menuExit = true;
+                                        menuChoice:
+                                        while (menuExit) {
+                                            System.out.println("Do You Want To Add Another Student Detail ? (Y/N) ");
+                                            String input = SCN.next();
+                                            if (input.equalsIgnoreCase("Y")) {
+                                                continue case1;
+                                            } else if (input.equalsIgnoreCase("N")) {
+                                                continue main;
+                                            } else {
+                                                System.out.println("Invalid Input.Try again");
+                                                continue menuChoice;
+                                            }
+                                        }
+
+                                    } else {
+                                        System.out.println("Invalid Marks.Try Again");
+                                        continue oopMarkCheck;
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        System.out.println("Invalid Name ! . Try Again");
+                        continue case1;
+                    }
+                }//case 1 main while loop
+            }//case 1
+            case 2 -> {
+                System.out.println("----Delete Student----");
+                case2:
+                while (true) {
+                    System.out.print("Enter Student ID You need to Delete: ");
+                    //SCN.skip("\n");
+                    String idToDelete = SCN.next();
+                    if (studentDetail.contains(idToDelete)) {
+                        boolean choice = true;
+                        choiceMenu:
+                        while (choice) {
+                            System.out.println("Do You Want To Delete  Student Detail ? (Y/N) ");
+                            String input = SCN.next();
+                            if (input.equalsIgnoreCase("Y")) {
+                                //delete student
+                                //  S001-kasun sampath-|23|45,=>replace => *-kasun sampath-|23|45,
+
+                                studentDetail = studentDetail.replace(idToDelete, "*");
+                                String strDelete = studentDetail.substring(studentDetail.indexOf("*"), studentDetail.indexOf(",", studentDetail.indexOf("*")));
+                                studentDetail = studentDetail.replace(strDelete, "");
+                                studentDetail = studentDetail.replace(",,", ",");
+                                if (!studentDetail.contains("S00")) {
+                                    studentDetail = "";
+                                }
+
+                                // studentDetail =studentDetail.replace(id);
+                                System.out.println("Student Record Deleted Successfully.");
+                                System.out.println(studentDetail);
+                                boolean menuExit = true;
+                                menuChoiceExit:
+                                while (menuExit) {
+                                    System.out.println("Do You Want To Delete Another Student Detail ? (Y/N) ");
+                                    String input2 = SCN.next();
+                                    if (input2.equalsIgnoreCase("Y")) {
+                                        continue case2;
+                                    } else if (input2.equalsIgnoreCase("N")) {
+                                        continue main;
+                                    } else {
+                                        System.out.println("Invalid Input.Try again");
+                                        continue menuChoiceExit;
+                                    }
+                                }
+                            } else if (input.equalsIgnoreCase("N")) {
+                                continue main;
+                            } else {
+                                System.out.println("Invalid Input.Try again");
+                                continue choiceMenu;
+                            }
+                        }
+                    } else {
+                        System.out.println("Student Detail Not Found !");
+                        boolean mainMenuExit = true;
+                        menuChoiceExit:
+                        while (mainMenuExit) {
+
+                            System.out.print("Please Press \"1\" to Try Again or \"2\" for Exit to Main Menu : ");
+                            String input3 = SCN.next();
+                            if (input3.equals("1")) {
+                                continue case2;
+                            } else if (input3.equals("2")) {
+                                continue main;
+                            } else {
+                                System.out.println("Invalid Input.Try again");
+                                continue menuChoiceExit;
+                            }
+                        }
+                    }
+                    //System.out.println(studentDetail);
+                }//main wwhile loop case2
+
+            }//case2
+
+            case 3 -> {
+                System.out.println("----Search Student----");
+                case3:
+                while (true) {
+                    System.out.print("Enter Student ID You need to Search: ");
+                    String searchId = SCN.next();
+                    if (studentDetail.contains(searchId)) {
+
+                        String searchStudent = studentDetail.substring(studentDetail.indexOf(searchId), studentDetail.indexOf(",", studentDetail.indexOf(searchId)));
+                        // System.out.println(searchStudent);
+                        String idOfStudent = searchStudent.substring(0, searchStudent.indexOf("-"));
+                        String nameOfStudent = searchStudent.substring(searchStudent.indexOf("-") + 1, searchStudent.lastIndexOf("-"));
+                        String pfMarks = searchStudent.substring(searchStudent.indexOf("|") + 1, searchStudent.lastIndexOf("|"));
+                        String oopMarks = searchStudent.substring(searchStudent.lastIndexOf("|") + 1);
+                        System.out.println("ID : " + idOfStudent);
+                        System.out.println("Name : " + nameOfStudent);
+                        System.out.println("P.F. Marks : " + pfMarks);
+                        System.out.println("O.O.P. Marks  : " + oopMarks);
+                        double averager = (Double.parseDouble(pfMarks) + Double.parseDouble(oopMarks)) / 2;
+                        System.out.println("Average : " + averager);
+
+                        boolean menu = true;
+                        menuChoice2:
+                        while (menu) {
+                            System.out.println("Do You Want To Search Another Student Detail ? (Y/N) ");
+                            String input2 = SCN.next();
+                            if (input2.equalsIgnoreCase("Y")) {
+                                continue case3;
+                            } else if (input2.equalsIgnoreCase("N")) {
+                                continue main;
+                            } else {
+                                System.out.println("Invalid Input.Try again");
+                                continue menuChoice2;
+                            }
+                        }
+
+                    } else {
+                        System.out.println("Student Detail Not Found.Try Again");
+                        continue case3;
+                    }
+                }
+            }
+            case 4 -> {
+                //studentDetail=studentDetail;
+                String worstRaw = STR."|\{RED} %-5s| %-24s| %-9s| %-9s| %-9s\{RESET}|";
+                String bestRaw = STR."|\{BLUE} %-5s| %-24s| %-9s| %-9s| %-9s\{RESET}|";
+                String raw = STR."| %-5s| %-24s| %-9s| %-9s| %-9s|";
+                String rawInit = STR."|          %-55s|\n";
+                System.out.println("----View All Students----");
+
+
+                if (studentDetail.length()>1) {
+                    System.out.println("----View All Students----");
+
+                    System.out.println("+------+-------------------------+----------+----------+----------+");
+                    System.out.println("|  ID  |    Name                 | Total    | Average  | Status   |");
+                    System.out.println("+------+-------------------------+----------+----------+----------+");
+                    String student, idOfStudent, nameOfStudent, pfMarks, oopMarks = "";
+                    String idOfStudentWorst = "", nameOfStudentWorst = "", pfMarksWorst = "", oopMarksWorst = "";
+                    String idOfStudentBest = "", nameOfStudentBest = "", pfMarksBest = "", oopMarksBest = "";
+                    String finalStudents = "";
+                    String gradeBest = "";
+                    String gradeWorst = "";
+                    double averager = 0;
+                    double total = 0;
+                    double averagerBest = 0;
+                    double totalBest = 0;
+                    double averagerWorst = 0;
+                    double totalWorst = 0;
+                    int commaIndex = 0;
+
+                    int count = (studentDetail.length() - studentDetail.replace(",", "").length()) - 1;
+                    //System.out.println(studentDetail);
+                    //System.out.println(count);
+
+                    for (int i = 0; i < count; i++) {
+
+                        student = studentDetail.substring(commaIndex + 1, studentDetail.indexOf(",", commaIndex + 1));
+                        // System.out.println(student);
+
+                        idOfStudent = student.substring(0, studentDetail.indexOf("-") - 1);
+                        nameOfStudent = student.substring(student.indexOf("-") + 1, student.lastIndexOf("-"));
+                        pfMarks = student.substring(student.indexOf("|") + 1, student.lastIndexOf("|"));
+                        oopMarks = student.substring(student.lastIndexOf("|") + 1);
+
+                        //System.out.println("ID : " + idOfStudent);
+                        //System.out.println("Name : " + nameOfStudent);
+
+                        //  System.out.println("P.F. Marks : " + pfMarks);
+                        //  System.out.println("O.O.P. Marks  : " + oopMarks);
+                        total = (Double.parseDouble(pfMarks) + Double.parseDouble(oopMarks));
+                        averager = total / 2;
+                        commaIndex = studentDetail.indexOf(",", commaIndex + 1);
+
+                        final String GRADE = averager > 85 ? "A+" : averager > 75 ? "A" : averager > 65 ? "B" :
+                                averager > 55 ? "C" : averager > 45 ? "S" : "F";
+
+                        finalStudents += STR."\{idOfStudent}-\{nameOfStudent}-|\{total}|\{averager}*\{GRADE},";
+
+
+                        if(count==1){
+
+                            worstAverage=averager;
+
+                            idOfStudentBest = idOfStudent;
+                            nameOfStudentBest = nameOfStudent;
+                            pfMarksBest = pfMarks;
+                            oopMarksBest = oopMarks;
+                            totalBest = total;
+                            averagerBest = averager;
+                            bestAverage = averagerBest;
+                            gradeBest = bestAverage > 85 ? "A+" : bestAverage > 75 ? "A" : bestAverage > 65 ? "B" : bestAverage > 55 ? "C" :
+                                    bestAverage > 45 ? "S" : "F";
+                            System.out.printf(worstRaw, "", "", "", "", "");
+                            System.out.print("\r");
+                        }else{
+
+                        //finding best Student
+                         if (averager > bestAverage) {
+
+                            idOfStudentBest = idOfStudent;
+                            nameOfStudentBest = nameOfStudent;
+                            pfMarksBest = pfMarks;
+                            oopMarksBest = oopMarks;
+                            totalBest = total;
+                            averagerBest = averager;
+                            bestAverage = averagerBest;
+                            gradeBest = bestAverage > 85 ? "A+" : bestAverage > 75 ? "A" : bestAverage > 65 ? "B" : bestAverage > 55 ? "C" :
+                                    bestAverage > 45 ? "S" : "F";
+                            //  System.out.println("gradeBest  " + gradeBest);
+                        } else {
+                            idOfStudentWorst = idOfStudent;
+                            nameOfStudentWorst = nameOfStudent;
+                            pfMarksWorst = pfMarks;
+                            oopMarksWorst = oopMarks;
+                            totalWorst = total;
+                            averagerWorst = averager;
+                            worstAverage = averagerWorst;
+                            gradeWorst = worstAverage > 85 ? "A+" : worstAverage > 75 ? "A" : worstAverage > 65 ? "B" : worstAverage > 55 ? "C" :
+                                    worstAverage > 45 ? "S" : "F";
+                            //  System.out.println("gradeWorst  " + gradeWorst);
+                        } }
+                    }
+
+                    System.out.printf(bestRaw, idOfStudentBest, nameOfStudentBest, totalBest, bestAverage, gradeBest);
+                    System.out.println();
+                    //System.out.println(finalStudents);
+
+                    int dataCount = finalStudents.length() - (finalStudents.replace(",", "")).length() ;
+                    int indexcomma = 0;
+                    forLoop:
+                    for (int q = 0; q < dataCount; q++) {
+
+                        String studentDivided = finalStudents.substring(indexcomma, finalStudents.indexOf(",", finalStudents.indexOf("S")));
+                        studentDivided = studentDivided.replace(",", "");
+                        // System.out.println("devided= " + studentDivided);
+
+                        idOfStudent = studentDivided.substring(0, studentDivided.indexOf("-"));
+
+                        //System.out.println(idOfStudent);
+                        nameOfStudent = studentDivided.substring(studentDivided.indexOf("-") + 1, studentDivided.lastIndexOf("-"));
+                        //System.out.println(nameOfStudent);
+                        total = Double.parseDouble(studentDivided.substring(studentDivided.indexOf("|") + 1, studentDivided.lastIndexOf("|")));
+                        averager = Double.parseDouble(studentDivided.substring(studentDivided.lastIndexOf("|") + 1, studentDivided.indexOf("*")));
+                        final String GRADE = averager > 85 ? "A+" : averager > 75 ? "A" : averager > 65 ? "B" :
+                                averager > 55 ? "C" : averager > 45 ? "S" : "F";
+                        //System.out.println(total);
+                        //System.out.println(averager);
+                        finalStudents = finalStudents.replace(studentDivided, "");
+
+                        if (idOfStudent.equals(idOfStudentBest)) {
+                            continue forLoop;
+                        } else if (idOfStudent.equals(idOfStudentWorst)) {
+                            System.out.printf(worstRaw, idOfStudentWorst, nameOfStudentWorst, totalWorst, worstAverage, gradeWorst);
+                            System.out.println();
+                        } else {
+                            System.out.printf(raw, idOfStudent, nameOfStudent, total, averager, GRADE);
+                            //System.out.println("Grde of st "+GRADE);
+                            System.out.println();
+                        }
+
+                    }
+                    System.out.println("+------+-------------------------+----------+----------+----------+");
+                    System.out.println("Best Student : \033[044m  \033[0m  |   Worst Student : \033[041m  \033[0m " );
+                }else{
+
+                    System.out.println("+------+-------------------------+----------+----------+----------+");
+                    System.out.println("|  ID  |    Name                 | Total    | Average  | Status   |");
+                    System.out.println("+------+-------------------------+----------+----------+----------+");
+
+                    System.out.printf(rawInit, "No Data Available");
+                    System.out.println("+------+-------------------------+----------+----------+----------+");
+                    //System.out.println(studentDetail);
+                }
+                ///
+            }//case 4 end
+            case 5 -> {
+                System.exit(0);
+            }
+            default -> {
+                System.out.println("Invalid Number ! Try Again. ");
+                //continue main;
+            }
+
+        }//switch
+
+    }//main while
+}//main loop
